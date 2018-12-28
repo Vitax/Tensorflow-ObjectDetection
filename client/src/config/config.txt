@@ -1,0 +1,5 @@
+{ 
+	"inference_graph": "/home/caglar/Code/Python/image_retrieval/tensorflow/models/research/object_detection/inference_graphs/inference_graph_2/frozen_inference_graph.pb" , 
+	"label_map": "/home/caglar/Code/Python/image_retrieval/tensorflow/models/research/object_detection/data/cust_label_map.pbtxt", 
+	"num_classes": "8" 
+}
