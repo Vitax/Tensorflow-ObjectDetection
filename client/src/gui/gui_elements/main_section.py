@@ -8,14 +8,14 @@
 # pylint: disable=no-self-use
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QVBoxLayout, QHBoxLayout
+from PyQt5.QtWidgets import QVBoxLayout, QGridLayout
 from PyQt5.QtWidgets import QPushButton
 
 from gui.gui_elements import image_section
 from gui.gui_elements.common import file_manager
 
 
-class MainSection(QHBoxLayout):
+class MainSection(QGridLayout):
     ''' Class of the MainSection '''
 
     def __init__(self):
@@ -27,7 +27,6 @@ class MainSection(QHBoxLayout):
         self.image_section = None
         self.file_manager = file_manager.FileManager(250)
         self.image_section = image_section.ImageSection()
-        self.image_section.addStretch(1)
 
         self.tree_view_layout = QVBoxLayout()
         self.tree_view_layout.setAlignment(Qt.AlignLeft)
@@ -43,8 +42,8 @@ class MainSection(QHBoxLayout):
         self.tree_obj = self.file_manager.create_tree_view("/home", self.get_selected_media)
         self.tree_view_layout.addWidget(self.tree_obj["file_manager"])
 
-        self.addLayout(self.tree_view_layout)
-        self.addLayout(self.image_section)
+        self.addLayout(self.tree_view_layout, 1, 1, Qt.AlignLeft)
+        self.addLayout(self.image_section, 1, 2, Qt.AlignLeft)
 
     def resize_update(self, width, height):
         """ resize_update function """

@@ -38,11 +38,6 @@ class Window(QMainWindow):
         self.width = self.widget.width()
         self.height = self.widget.height()
 
-        debounce = QTimer()
-        debounce.setInterval(250)
-        debounce.setSingleShot(True)
-        debounce.timeout.connect(self.resizeEvent)
-
         self.main_section.resize_update(self.width, self.height)
 
     def draw(self):

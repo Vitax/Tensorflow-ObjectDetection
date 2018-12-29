@@ -26,34 +26,24 @@ class ImageSection(QHBoxLayout):
         super().__init__()
 
         # Private variables
-        self.tree_view_width = 250
         self.current_media = ""
+        self.tree_view_width = 250
         self.current_raw_image = None
+        self.current_width, self.current_height = 640, 480
 
-        self.active_config = config_getter.get_config_file_content(
-            config_getter.get_config_file()
-        )
-
-        self.create_tensorflow_objects()
+        self.img_detector = image_detection.TFImageDetection()
 
         self.img_label = QLabel()
         self.img_label.setAlignment(Qt.AlignCenter)
-        self.img_label.setMinimumSize(640, 480)
+        self.img_label.setMinimumSize(self.current_width, self.current_height)
         self.img_label.setScaledContents(False)
 
         self.addWidget(self.img_label)
 
-    def create_tensorflow_objects(self):
-        print(' in here ')
-        self.tensor_session = tensorflow_session.TensorflowSession()
-
-        if self.tensor_session.session is not None:
-            self.img_detector = image_detection.TFImageDetection()
-        else:
-            self.img_detector = None
-
     def resize_update(self, width, height):
         """ Update method to handle Resize events """
+        self.current_width = width - 250
+        self.current_height = height
         if self.current_media != "":
             if self.is_image(self.current_media):
                 self.draw_image(self.current_media, width - self.tree_view_width, height, True)
@@ -64,42 +54,27 @@ class ImageSection(QHBoxLayout):
         """ Draw the selected pixmap """
         self.current_media = media_path
 
-        config_content = config_getter.get_config_file_content(config_getter.get_config_file())
-
-        if self.active_config != config_content:
-            self.active_config = config_content
-            self.create_tensorflow_objects()
-
         if self.current_media != "" and os.path.isfile(self.current_media):
             if self.is_image(media_path):
-                self.draw_image(media_path, self.img_label.width(), self.img_label.height())
+                self.draw_image(media_path, self.current_width, self.current_height)
             elif self.is_video(media_path):
-                self.play_video(media_path, self.img_label.width(), self.img_label.height())
+                self.play_video(media_path, self.current_width, self.current_height)
 
     def draw_image(self, media_path, width, height, resize_event=False):
         """ Draw the pixmap on the QLabel Object and display it """
         # Numpy array containing the rgb pixels
-        if not resize_event and self.img_detector is not None:
+
+        if not resize_event:
             self.current_raw_image = self.img_detector.object_detection(media_path)
-            img_height, img_width, channels = self.current_raw_image.shape
-            bytes_per_line = channels * img_width
 
-            image = QImage(
-                self.current_raw_image, img_width, img_height, bytes_per_line, QImage.Format_RGB888
-            ).scaled(QSize(width, height), Qt.KeepAspectRatio).rgbSwapped()
+        img_height, img_width, channels = self.current_raw_image.shape
+        bytes_per_line = channels * img_width
 
-            pixmap = QPixmap(image).scaled(QSize(width, height), Qt.KeepAspectRatio)
-        elif resize_event:
-            img_height, img_width, channels = self.current_raw_image.shape
-            bytes_per_line = channels * img_width
+        image = QImage(
+            self.current_raw_image, img_width, img_height, bytes_per_line, QImage.Format_RGB888
+        ).scaled(QSize(width, height), Qt.KeepAspectRatio).rgbSwapped()
 
-            image = QImage(
-                self.current_raw_image, img_width, img_height, bytes_per_line, QImage.Format_RGB888
-            ).scaled(QSize(width, height), Qt.KeepAspectRatio).rgbSwapped()
-
-            pixmap = QPixmap(image).scaled(QSize(width, height), Qt.KeepAspectRatio)
-        else:
-            pixmap = QPixmap(media_path).scaled(QSize(width, height), Qt.KeepAspectRatio)
+        pixmap = QPixmap(image).scaled(QSize(width, height), Qt.KeepAspectRatio)
 
         self.img_label.setPixmap(pixmap)
         self.img_label.show()
