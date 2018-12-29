@@ -32,7 +32,7 @@ class TFImageDetection():
     def object_detection(self, file_path, threshhold=0.5):
         """ Performs the Object detection with the given threshold """
         # Intitializes the tensorflow model
-        tensor_model = tensorflow_session.TensorflowSession(self.config_content)
+        tensor_model = tensorflow_session.TensorflowSession()
         session = tensor_model.session
         tensor_objects = tensor_model.tensor_object
 

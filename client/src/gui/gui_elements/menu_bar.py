@@ -39,12 +39,7 @@ class MenuBar(QVBoxLayout):
         self.label_map_path = ""
         self.num_classes = str(0)
 
-        self.config_file_path = config_getter.get_config_file()
-        content = config_getter.get_config_file_content(self.config_file_path)
-
-        self.inference_graph_path = content["inference_graph"]
-        self.label_map_path = content["label_map"]
-        self.num_classes = content["num_classes"]
+        self.get_config_content()
 
         self.file_manager = file_manager.FileManager()
         self.menu_bar = QMenuBar()
@@ -58,6 +53,19 @@ class MenuBar(QVBoxLayout):
         self.edit_option.addAction(self.config_action)
 
         self.addWidget(self.menu_bar)
+
+    def get_config_content(self):
+        self.config_file_path = config_getter.get_config_file()
+        content = config_getter.get_config_file_content(self.config_file_path)
+
+        if content is not None:
+            self.inference_graph_path = content["inference_graph"]
+            self.label_map_path = content["label_map"]
+            self.num_classes = content["num_classes"]
+        else:
+            self.inference_graph_path = ""
+            self.label_map_path = ""
+            self.num_classes = str(0)
 
     def config_button_clicked(self):
         """ Event function for the config button """
@@ -204,6 +212,7 @@ class MenuBar(QVBoxLayout):
 
     def browse_button_label_map_clicked(self):
         """ Function which gets called on label_map button click """
+        self.get_config_content()
         self.file_manager.create_tree_view_popup(self.label_map_path, self.callback_func_label_map)
 
     def callback_func_label_map(self, value):

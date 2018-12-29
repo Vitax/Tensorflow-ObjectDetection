@@ -25,15 +25,16 @@ class ImageSection(QHBoxLayout):
     def __init__(self):
         super().__init__()
 
-        self.current_media = ""
+        # Private variables
         self.tree_view_width = 250
+        self.current_media = ""
         self.current_raw_image = None
-        self.tensor_session = None
-        self.img_detector = None
 
-        self.config_content = config_getter.get_config_file_content(
+        self.active_config = config_getter.get_config_file_content(
             config_getter.get_config_file()
         )
+
+        self.create_tensorflow_objects()
 
         self.img_label = QLabel()
         self.img_label.setAlignment(Qt.AlignCenter)
@@ -41,6 +42,15 @@ class ImageSection(QHBoxLayout):
         self.img_label.setScaledContents(False)
 
         self.addWidget(self.img_label)
+
+    def create_tensorflow_objects(self):
+        print(' in here ')
+        self.tensor_session = tensorflow_session.TensorflowSession()
+
+        if self.tensor_session.session is not None:
+            self.img_detector = image_detection.TFImageDetection()
+        else:
+            self.img_detector = None
 
     def resize_update(self, width, height):
         """ Update method to handle Resize events """
@@ -53,8 +63,12 @@ class ImageSection(QHBoxLayout):
     def show_media(self, media_path):
         """ Draw the selected pixmap """
         self.current_media = media_path
-        self.tensor_session = tensorflow_session.TensorflowSession(self.config_content)
-        self.img_detector = image_detection.TFImageDetection()
+
+        config_content = config_getter.get_config_file_content(config_getter.get_config_file())
+
+        if self.active_config != config_content:
+            self.active_config = config_content
+            self.create_tensorflow_objects()
 
         if self.current_media != "" and os.path.isfile(self.current_media):
             if self.is_image(media_path):
@@ -65,17 +79,27 @@ class ImageSection(QHBoxLayout):
     def draw_image(self, media_path, width, height, resize_event=False):
         """ Draw the pixmap on the QLabel Object and display it """
         # Numpy array containing the rgb pixels
-        if not resize_event:
+        if not resize_event and self.img_detector is not None:
             self.current_raw_image = self.img_detector.object_detection(media_path)
+            img_height, img_width, channels = self.current_raw_image.shape
+            bytes_per_line = channels * img_width
 
-        img_height, img_width, channels = self.current_raw_image.shape
-        bytes_per_line = channels * img_width
+            image = QImage(
+                self.current_raw_image, img_width, img_height, bytes_per_line, QImage.Format_RGB888
+            ).scaled(QSize(width, height), Qt.KeepAspectRatio).rgbSwapped()
 
-        image = QImage(
-            self.current_raw_image, img_width, img_height, bytes_per_line, QImage.Format_RGB888
-        ).scaled(QSize(width, height), Qt.KeepAspectRatio).rgbSwapped()
+            pixmap = QPixmap(image).scaled(QSize(width, height), Qt.KeepAspectRatio)
+        elif resize_event:
+            img_height, img_width, channels = self.current_raw_image.shape
+            bytes_per_line = channels * img_width
 
-        pixmap = QPixmap(image).scaled(QSize(width, height), Qt.KeepAspectRatio)
+            image = QImage(
+                self.current_raw_image, img_width, img_height, bytes_per_line, QImage.Format_RGB888
+            ).scaled(QSize(width, height), Qt.KeepAspectRatio).rgbSwapped()
+
+            pixmap = QPixmap(image).scaled(QSize(width, height), Qt.KeepAspectRatio)
+        else:
+            pixmap = QPixmap(media_path).scaled(QSize(width, height), Qt.KeepAspectRatio)
 
         self.img_label.setPixmap(pixmap)
         self.img_label.show()

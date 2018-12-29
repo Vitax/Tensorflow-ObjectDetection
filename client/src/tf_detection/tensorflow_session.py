@@ -9,6 +9,7 @@
 
 import tensorflow
 
+from helper import config_getter
 from object_detection.utils import label_map_util
 
 
@@ -18,14 +19,17 @@ class TensorflowSession():
     session = None
     tensor_object = {}
 
-    def __init__(self, tensorflow_configuration):
+    def __init__(self):
         """ Initializes the Class containing a Tensorflow _session """
-        label_map = label_map_util.load_labelmap(tensorflow_configuration["label_map"])
+        config = config_getter.get_config_file_content(config_getter.get_config_file())
+
+        if config is None:
+            return
+
+        label_map = label_map_util.load_labelmap(config["label_map"])
 
         categories = label_map_util.convert_label_map_to_categories(
-            label_map,
-            max_num_classes=int(int(tensorflow_configuration["num_classes"])),
-            use_display_name=True
+            label_map, max_num_classes=int(int(config["num_classes"])), use_display_name=True
         )
 
         category_index = label_map_util.create_category_index(categories)
@@ -35,7 +39,7 @@ class TensorflowSession():
         with detection_graph.as_default():
             graph_def = tensorflow.GraphDef()
 
-            with tensorflow.gfile.GFile(tensorflow_configuration["inference_graph"], 'rb') as f:
+            with tensorflow.gfile.GFile(config["inference_graph"], 'rb') as f:
                 serialized_graph = f.read()
                 graph_def.ParseFromString(serialized_graph)
                 tensorflow.import_graph_def(graph_def, name="")

@@ -16,6 +16,9 @@ def get_config_file():
 def get_config_file_content(config_file_path):
     """ Gets the content of the current Config file """
     config_file = open(config_file_path)
-    content = json.loads(config_file.read())
+    try:
+        content = json.loads(config_file.read())
+        return content
+    except:
+        return None
 
-    return content
