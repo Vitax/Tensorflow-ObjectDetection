@@ -6,7 +6,8 @@
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 
-from gui.gui_elements import menu_bar, main_section
+from gui.gui_elements.menu_bar import menu_bar
+from gui.gui_elements import main_section
 
 
 class Window(QMainWindow):
@@ -16,19 +17,19 @@ class Window(QMainWindow):
         super().__init__()
 
         self.widget = QWidget()
-        self.main_layout = QVBoxLayout()
+        self.app_layout = QVBoxLayout()
 
         self.width, self.height = self.widget.width(), self.widget.height()
 
-        # Create components of the application and add it to the main_layout
+        # Create components of the application and add it to the app_layout
         self.main_menu = menu_bar.MenuBar()
         self.main_section = main_section.MainSection()
 
-        self.main_layout.addLayout(self.main_menu)
-        self.main_layout.addLayout(self.main_section)
+        self.app_layout.addLayout(self.main_menu)
+        self.app_layout.addLayout(self.main_section)
 
         self.widget.setWindowTitle("Tensorflow Object Detection Client")
-        self.widget.setLayout(self.main_layout)
+        self.widget.setLayout(self.app_layout)
         self.setCentralWidget(self.widget)
 
     def resizeEvent(self, event):

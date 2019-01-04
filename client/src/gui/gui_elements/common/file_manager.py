@@ -34,6 +34,7 @@ class FileManager:
     def create_tree_view(self, start_path="/home", callback=None):
         """ Display the tree view to choose a folder """
         file_manager = QTreeView()
+
         self.callback_func = callback
 
         self.model = QFileSystemModel()
@@ -45,9 +46,9 @@ class FileManager:
         # hide all columns except the filename
         for i in range(1, self.model.columnCount()):
             file_manager.hideColumn(i)
-
         file_manager.setRootIndex(self.model.index(start_path))
         file_manager.setFixedWidth(self.width)
+        file_manager.setWordWrap(True)
 
         file_manager.clicked.connect(self.item_clicked)
         return {"file_manager": file_manager, "file_model": self.model}

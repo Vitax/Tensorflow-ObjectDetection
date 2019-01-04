@@ -11,15 +11,14 @@ import os
 
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtWidgets import QHBoxLayout
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QHBoxLayout, QGridLayout, QVBoxLayout
+from PyQt5.QtWidgets import QLabel, QPushButton
 
-from helper import config_getter
-from tf_detection import tensorflow_session
 from tf_detection import image_detection
+from gui.gui_elements.common import file_manager
 
 
-class ImageSection(QHBoxLayout):
+class ImageSection(QGridLayout):
     """ Class of ImageSection """
 
     def __init__(self):
@@ -27,22 +26,50 @@ class ImageSection(QHBoxLayout):
 
         # Private variables
         self.current_media = ""
+        self.chosen_image_directory = ""
         self.tree_view_width = 250
         self.current_raw_image = None
         self.current_width, self.current_height = 640, 480
 
         self.img_detector = image_detection.TFImageDetection()
 
+        self.create_image_layout()
+        self.create_tree_view_layout()
+
+        self.addLayout(self.tree_view_layout, 1, 1)
+        self.addLayout(self.image_layout, 1, 2)
+
+    def create_image_layout(self):
+        self.image_layout = QHBoxLayout()
+
+        self.image_layout.video_label = QLabel()
         self.img_label = QLabel()
         self.img_label.setAlignment(Qt.AlignCenter)
         self.img_label.setMinimumSize(self.current_width, self.current_height)
         self.img_label.setScaledContents(False)
 
-        self.addWidget(self.img_label)
+        self.image_layout.addWidget(self.img_label)
+
+    def create_tree_view_layout(self):
+        self.file_manager = file_manager.FileManager(self.tree_view_width)
+
+        self.tree_view_layout = QVBoxLayout()
+        self.tree_view_layout.setAlignment(Qt.AlignLeft)
+
+        button = QPushButton()
+        button.setText('Open Image Folder')
+        button.clicked.connect(
+            lambda x: self.file_manager.create_tree_view_popup("", self.set_image_dir, True)
+        )
+
+        self.tree_view_layout.addWidget(button)
+
+        self.tree_obj = self.file_manager.create_tree_view("/home", self.get_selected_media)
+        self.tree_view_layout.addWidget(self.tree_obj["file_manager"])
 
     def resize_update(self, width, height):
         """ Update method to handle Resize events """
-        self.current_width = width - 250
+        self.current_width = width - self.tree_view_width
         self.current_height = height
         if self.current_media != "":
             if self.is_image(self.current_media):
@@ -77,11 +104,14 @@ class ImageSection(QHBoxLayout):
         pixmap = QPixmap(image).scaled(QSize(width, height), Qt.KeepAspectRatio)
 
         self.img_label.setPixmap(pixmap)
-        self.img_label.show()
 
     def play_video(self, video_path, width, height, resize_event=False):
         """ Render the Video in QLabel Object """
         #TODO: implement this to display videos in qt
+
+        if not resize_event:
+            print('resize the video without doing anything else')
+
         print(video_path, ' ', width, '  ', height)
 
     def is_image(self, media_path):
@@ -101,3 +131,14 @@ class ImageSection(QHBoxLayout):
             return True
 
         return False
+
+    def set_image_dir(self, chosen_dir):
+        """ Set the side view with the chosen directory """
+        self.chosen_image_directory = chosen_dir["dir_path"]
+        self.tree_obj["file_manager"].setRootIndex(
+            self.tree_obj["file_model"].index(chosen_dir["dir_path"])
+        )
+
+    def get_selected_media(self, chosen_item):
+        """ return the selected item from the side section """
+        self.show_media(chosen_item["file_path"])
