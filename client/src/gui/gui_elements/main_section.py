@@ -7,10 +7,11 @@
 # pylint: disable=too-few-public-methods
 # pylint: disable=no-self-use
 
-from PyQt5.QtWidgets import QVBoxLayout, QGridLayout
+from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtWidgets import QWidget, QTabWidget
 
 from gui.gui_elements.image_section import image_section
+from gui.gui_elements.camera_section import camera_section
 
 
 class MainSection(QVBoxLayout):
@@ -19,15 +20,15 @@ class MainSection(QVBoxLayout):
     def __init__(self):
         super().__init__()
 
-        self.tabs = QTabWidget()
         self.img_widget = QWidget()
         self.image_section_layout = image_section.ImageSection()
-
         self.img_widget.setLayout(self.image_section_layout)
 
         self.camera_widget = QWidget()
-        self.camer_layout = QGridLayout()
+        self.camera_section_layout = camera_section.CameraSection()
+        self.camera_widget.setLayout(self.camera_section_layout)
 
+        self.tabs = QTabWidget()
         self.tabs.addTab(self.img_widget, "Images")
         self.tabs.addTab(self.camera_widget, "Camera")
 
@@ -36,3 +37,4 @@ class MainSection(QVBoxLayout):
     def resize_update(self, width, height):
         """ resize_update function """
         self.image_section_layout.resize_update(width, height)
+        self.camera_section_layout.resize_update(width, height)

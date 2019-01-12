@@ -8,6 +8,7 @@
 # pylint: disable=no-self-use
 
 import os
+import cv2
 
 from PyQt5.QtCore import Qt, QSize
 from PyQt5.QtGui import QPixmap, QImage
@@ -42,7 +43,6 @@ class ImageSection(QGridLayout):
     def create_image_layout(self):
         self.image_layout = QHBoxLayout()
 
-        self.image_layout.video_label = QLabel()
         self.img_label = QLabel()
         self.img_label.setAlignment(Qt.AlignCenter)
         self.img_label.setMinimumSize(self.current_width, self.current_height)
@@ -71,6 +71,7 @@ class ImageSection(QGridLayout):
         """ Update method to handle Resize events """
         self.current_width = width - self.tree_view_width
         self.current_height = height
+
         if self.current_media != "":
             if self.is_image(self.current_media):
                 self.draw_image(self.current_media, width - self.tree_view_width, height, True)
@@ -92,13 +93,12 @@ class ImageSection(QGridLayout):
         # Numpy array containing the rgb pixels
 
         if not resize_event:
-            self.current_raw_image = self.img_detector.object_detection(media_path)
+            self.current_raw_image = self.img_detector.object_detection(cv2.imread(media_path))
 
         img_height, img_width, channels = self.current_raw_image.shape
-        bytes_per_line = channels * img_width
 
         image = QImage(
-            self.current_raw_image, img_width, img_height, bytes_per_line, QImage.Format_RGB888
+            self.current_raw_image, img_width, img_height, self.current_raw_image.strides[0], QImage.Format_RGB888
         ).scaled(QSize(width, height), Qt.KeepAspectRatio).rgbSwapped()
 
         pixmap = QPixmap(image).scaled(QSize(width, height), Qt.KeepAspectRatio)
