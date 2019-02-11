@@ -3,7 +3,6 @@
     __author__ = "Caglar Özel"
 """
 
-from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout
 
 from gui.gui_elements.menu_bar import menu_bar
@@ -15,6 +14,8 @@ class Window(QMainWindow):
 
     def __init__(self):
         super().__init__()
+
+        self.setMinimumSize(1024, 768)
 
         self.widget = QWidget()
         self.app_layout = QVBoxLayout()

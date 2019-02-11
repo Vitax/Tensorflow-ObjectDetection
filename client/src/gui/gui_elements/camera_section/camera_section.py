@@ -18,8 +18,6 @@ class CameraSection(QGridLayout):
     def __init__(self):
         super().__init__()
 
-        self.capture_camera = False
-
         self.current_width, self.current_height = 640, 480
         self.button_layout = self.create_camera_label()
         self.camera_layout = self.create_button_layout()
@@ -37,6 +35,7 @@ class CameraSection(QGridLayout):
         camera_layout = QHBoxLayout()
         self.camera_label = QLabel()
 
+        self.camera_label.setAlignment(Qt.AlignCenter)
         self.camera_label.setMinimumSize(self.current_width, self.current_height)
         self.camera_label.setScaledContents(False)
         camera_layout.addWidget(self.camera_label)
@@ -64,15 +63,13 @@ class CameraSection(QGridLayout):
         return button
 
     def start_webcam(self):
-        self.capture_camera = True
-
         self.capture = cv2.VideoCapture(0)
         self.capture.set(cv2.CAP_PROP_FRAME_HEIGHT, self.current_height)
         self.capture.set(cv2.CAP_PROP_FRAME_WIDTH, self.current_width)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_frame)
-        self.timer.start(5)
+        self.timer.start(1)
 
     def update_frame(self):
         ret, frame = self.capture.read()
@@ -98,6 +95,5 @@ class CameraSection(QGridLayout):
         )
 
     def stop_webcam(self):
-        self.capture_camera = False
         self.timer.stop()
         self.capture.release()
