@@ -15,8 +15,8 @@ class MediaHelper():
 
     def is_grayscale(self, image):
         """ Check if image is greyscale """
-        if len(image.shape) < 3:
-            return True
+        if image is not None and len(image.shape) < 3:
+                return True
         return False
 
     def is_image(self, media_path):

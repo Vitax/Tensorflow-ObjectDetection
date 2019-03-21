@@ -8,6 +8,7 @@
 #pylint: disable=too-few-public-methods
 
 import tensorflow
+import os
 
 from helper import config_getter
 from object_detection.utils import label_map_util
@@ -23,7 +24,7 @@ class TensorflowSession():
         """ Initializes the Class containing a Tensorflow _session """
         config = config_getter.get_config_file_content(config_getter.get_config_file())
 
-        if config is None:
+        if config is None or not os.path.isfile(config["inference_graph"]) or not os.path.isfile(config["label_map"]):
             return
 
         label_map = label_map_util.load_labelmap(config["label_map"])

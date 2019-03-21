@@ -145,6 +145,9 @@ class ImageSection(QGridLayout):
             # Numpy array containing the rgb pixels
             self.current_image = self.img_detector.object_detection(image)
 
+        #if self.img_detector is None:
+        #    self.current_image = image
+
         img_height, img_width, channels = self.current_image.shape
 
         image = QImage(

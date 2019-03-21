@@ -36,7 +36,7 @@ class TFImageDetection():
         # if current config differs from previous reinstantiate tensor_model
         current_config_content = config_getter.get_config_file_content(self.config_file_path)
 
-        if not current_config_content["inference_graph"] == self.config_content["inference_graph"]:
+        if not current_config_content["inference_graph"] == self.config_content["inference_graph"] or self.tensor_model is None:
             self.tensor_model = tensorflow_session.TensorflowSession()
 
         session = self.tensor_model.session
